@@ -1,0 +1,6 @@
+baseURL = "http://xplo1t.me/"
+languageCode = "en-us"
+title = "xplo1t's site"
+theme = "PaperMod"
+
+enableRobotsTXT = true
