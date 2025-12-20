@@ -6,3 +6,41 @@ title = "xplo1t's site"
 theme = "PaperMod"
 
 enableRobotsTXT = true
+
+[params]
+    ShowReadingTime = true
+    ShowShareButtons = true
+    ShowToc = true
+    ShowBreadCrumbs = true
+    ShowPostNavLinks = true
+    ShowCodeCopyButtons = true
+
+    [params.profileMode]
+        enabled = true
+        title = "xplo1t"
+        subtitle = "Hi there 👋"
+        [[params.profileMode.buttons]]
+            name = "Blogs"
+            url = "/posts"
+
+    [[params.socialIcons]]
+        name = "Twitter"
+        url = "https://twitter.com/manash036"
+    [[params.socialIcons]]
+        name = "LinkedIn"
+        url = "https://www.linkedin.com/in/manash-saikia"
+    [[params.socialIcons]]
+        name = "Github"
+        url = "https://github.com/xplo1t-sec"
+    [[params.socialIcons]]
+        name = "Bugcrowd"
+        url = "https://bugcrowd.com/xplo1t"
+    [[params.socialIcons]]
+        name = "Hackerone"
+        url = "https://hackerone.com/xplo1t"
+    [[params.socialIcons]]
+        name = "Intigriti"
+        url = "https://app.intigriti.com/profile/xplo1t"
+    [[params.socialIcons]]
+        name = "Yogosha"
+        url = "https://app.yogosha.com/r/xplo1t"
