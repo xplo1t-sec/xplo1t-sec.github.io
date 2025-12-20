@@ -1,5 +1,7 @@
-baseURL = "http://xplo1t.me/"
+baseURL = "https://xplo1t-sec.github.io/"
 languageCode = "en-us"
+relativeURLs = true
+canonifyURLs = false
 title = "xplo1t's site"
 theme = "PaperMod"
 
