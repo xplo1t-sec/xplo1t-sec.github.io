@@ -15,6 +15,11 @@ enableRobotsTXT = true
     ShowPostNavLinks = true
     ShowCodeCopyButtons = true
 
+    [params.label]
+        text = "xplo1t's site"
+        icon = "/favicon.ico"
+        iconHeight = 35
+
     [params.profileMode]
         enabled = true
         title = "xplo1t"
@@ -44,3 +49,10 @@ enableRobotsTXT = true
     [[params.socialIcons]]
         name = "Yogosha"
         url = "https://app.yogosha.com/r/xplo1t"
+
+    [params.assets]
+        favicon = "/favicon.ico"
+        favicon16x16 = "/favicon.ico"
+        favicon32x32 = "/favicon.ico"
+        apple_touch_icon = "/favicon.ico"
+        safari_pinned_tab = "/favicon.ico"
